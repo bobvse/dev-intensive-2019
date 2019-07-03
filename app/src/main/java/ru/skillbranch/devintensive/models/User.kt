@@ -1,8 +1,9 @@
 package ru.skillbranch.devintensive.models
 
+import ru.skillbranch.devintensive.utils.Utils
 import java.util.*
 
-class User(val id: String,
+data class User(val id: String,
            var firstName: String?,
            var lastName: String?,
            var avatar: String?,
@@ -40,10 +41,14 @@ class User(val id: String,
 
         fun makeUser(fullName: String?): User {
             lastId++
-            val parts: List<String>? = fullName?.split(" ")
 
-            var firstName = parts?.getOrNull(0)
-            var lastName = parts?.getOrNull(1)
+            var (firstName, lastName) = Utils.parseFullName(fullName)
+
+            if (fullName == "" || fullName == " ") {
+                firstName = null
+                lastName = null
+            }
+
 
             return User(id = "$lastId", firstName = firstName, lastName = lastName)
         }

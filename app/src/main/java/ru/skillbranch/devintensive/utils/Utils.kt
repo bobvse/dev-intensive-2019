@@ -14,4 +14,13 @@ object Utils {
         return firstName to lastName
         //return Pair(firstName, lastName)
     }
+
+     fun toInitials(firstName: String?, lastName: String?): String {
+        TODO ("Not implemented")
+    }
+
+    fun transliteration(payload: String,devider:String=" "): String {
+
+        TODO ("Not implemented")
+    }
 }

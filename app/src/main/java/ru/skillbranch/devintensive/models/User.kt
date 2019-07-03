@@ -9,7 +9,7 @@ data class User(val id: String,
            var avatar: String?,
            var rating: Int = 0,
            var respect: Int = 0,
-           var lastVisit: Date? = Date(),
+           var lastVisit: Date = Date(),
            var isOnline: Boolean = false) {
 
     constructor(id: String, firstName: String?, lastName: String?) : this(

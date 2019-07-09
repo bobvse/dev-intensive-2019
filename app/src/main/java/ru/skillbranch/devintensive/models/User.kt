@@ -9,7 +9,7 @@ data class User(val id: String,
                 var avatar: String?,
                 var rating: Int = 0,
                 var respect: Int = 0,
-                var lastVisit: Date? = Date(),
+                var lastVisit: Date = Date(),
                 var isOnline: Boolean = false) {
 
     data class Builder(
@@ -19,7 +19,7 @@ data class User(val id: String,
             var avatar: String? = null,
             var rating: Int = 0,
             var respect: Int = 0,
-            var lastVisit: Date? = Date(),
+            var lastVisit: Date = Date(),
             var isOnline: Boolean = false
     ) {
         fun id(id: String?) = apply { this.id = id }
@@ -28,7 +28,7 @@ data class User(val id: String,
         fun avatar(avatar: String?) = apply { this.avatar = avatar }
         fun rating(rating: Int) = apply { this.rating = rating }
         fun respect(respect: Int) = apply { this.respect = respect }
-        fun lastVisit(lastVisit: Date?) = apply { this.lastVisit = lastVisit }
+        fun lastVisit(lastVisit: Date) = apply { this.lastVisit = lastVisit }
         fun isOnline(isOnline: Boolean) = apply { this.isOnline = isOnline }
         fun build() = User(
                 "${id ?: Factory.userId++}",
@@ -60,5 +60,4 @@ data class User(val id: String,
             return User("${userId++}", firstName, lastName,avatar = null)
         }
     }
-
 }

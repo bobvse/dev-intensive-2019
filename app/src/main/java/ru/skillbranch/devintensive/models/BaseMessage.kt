@@ -3,7 +3,6 @@ package ru.skillbranch.devintensive.models
 import java.util.*
 
 abstract class BaseMessage(
-        val id: String,
         val from: User?,
         val chat: Chat,
         val isIncoming: Boolean = false,
@@ -30,7 +29,6 @@ abstract class BaseMessage(
         ): BaseMessage {
             return when (type) {
                 "image" -> ImageMessage(
-                        "${++messageId}",
                         from,
                         chat,
                         isIncoming,
@@ -38,7 +36,6 @@ abstract class BaseMessage(
                         image = payload as String
                 )
                 else -> TextMessage(
-                        "${++messageId}",
                         from,
                         chat,
                         isIncoming,

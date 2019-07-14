@@ -1,21 +1,19 @@
 package ru.skillbranch.devintensive.utils
 
-import ru.skillbranch.devintensive.models.User
-
 object Utils {
     private val transliterationMap = mapOf(
-            'а' to "a", 'б' to "b", 'в' to "v", 'г' to "g", 'д' to "d",
-            'е' to "e", 'ё' to "e", 'ж' to "zh", 'з' to "z", 'и' to "i",
-            'й' to "i", 'к' to "k", 'л' to "l", 'м' to "m", 'н' to "n",
-            'о' to "o", 'п' to "p", 'р' to "r", 'с' to "s", 'т' to "t",
-            'у' to "u", 'ф' to "f", 'х' to "h", 'ц' to "c", 'ч' to "ch",
-            'ш' to "sh", 'щ' to "sh'",'ъ' to "", 'ы' to "i", 'ь' to "",
-            'э' to "e", 'ю' to "yu", 'я' to "ya"
+        'а' to "a", 'б' to "b", 'в' to "v", 'г' to "g", 'д' to "d",
+        'е' to "e", 'ё' to "e", 'ж' to "zh", 'з' to "z", 'и' to "i",
+        'й' to "i", 'к' to "k", 'л' to "l", 'м' to "m", 'н' to "n",
+        'о' to "o", 'п' to "p", 'р' to "r", 'с' to "s", 'т' to "t",
+        'у' to "u", 'ф' to "f", 'х' to "h", 'ц' to "c", 'ч' to "ch",
+        'ш' to "sh", 'щ' to "sh'", 'ъ' to "", 'ы' to "i", 'ь' to "",
+        'э' to "e", 'ю' to "yu", 'я' to "ya"
     )
 
     fun parseFullName(userName: String?): Pair<String?, String?> {
         val fullName: List<String>? =
-                userName?.split(" ")?.filter { s: String -> s.isNotEmpty() }
+            userName?.split(" ")?.filter { s: String -> s.isNotEmpty() }
 
         val firstName: String? = fullName?.getOrNull(0)
         val lastName: String? = fullName?.getOrNull(1)

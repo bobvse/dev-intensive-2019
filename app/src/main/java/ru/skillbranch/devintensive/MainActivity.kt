@@ -16,11 +16,11 @@ import ru.skillbranch.devintensive.models.Bender
 
 class MainActivity : AppCompatActivity() {
 
-    lateinit var benderImage: ImageView
-    lateinit var textTv: TextView
-    lateinit var messageEt: EditText
-    lateinit var sendBtn: ImageView
-    lateinit var benderObj: Bender
+    private lateinit var benderImage: ImageView
+    private lateinit var textTv: TextView
+    private lateinit var messageEt: EditText
+    private lateinit var sendBtn: ImageView
+    private lateinit var benderObj: Bender
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

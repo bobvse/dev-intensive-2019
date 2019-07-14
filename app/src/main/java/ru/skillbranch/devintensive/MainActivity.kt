@@ -9,10 +9,11 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.dev_intensive_2019.R
+
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.skillbranch.devintensive.extensions.hideKeyboard
 import ru.skillbranch.devintensive.models.Bender
+import ru.skillbranch.devintesive.R
 
 class MainActivity : AppCompatActivity() {
 

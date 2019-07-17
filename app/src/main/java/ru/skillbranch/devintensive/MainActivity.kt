@@ -5,6 +5,7 @@ import android.graphics.PorterDuff
 import android.os.Bundle
 import android.text.InputType
 import android.view.KeyEvent
+import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.ImageView
@@ -15,7 +16,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import ru.skillbranch.devintensive.extensions.hideKeyboard
 import ru.skillbranch.devintensive.models.Bender
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(),TextView.OnEditorActionListener, View.OnClickListener {
 
     private lateinit var benderImage: ImageView
     private lateinit var textTv: TextView
@@ -38,19 +39,21 @@ class MainActivity : AppCompatActivity() {
 
         textTv.text = benderObj.askQuestion()
         setBenderColor(benderObj.status.color)
-        sendBtn.setOnClickListener { sendAnswer() }
-        messageEt.setOnEditorActionListener { _, actionId, event ->
-            if (actionId == EditorInfo.IME_ACTION_DONE ||
-                event != null &&
-                event.action == KeyEvent.ACTION_DOWN &&
-                event.keyCode == KeyEvent.KEYCODE_ENTER
-            ) {
-                sendAnswer()
-                true
-            } else {
-                false
-            }
-        }
+        sendBtn.setOnClickListener(this)
+        messageEt.setOnEditorActionListener(this)
+//        sendBtn.setOnClickListener { sendAnswer() }
+//        messageEt.setOnEditorActionListener { _, actionId, event ->
+//            if (actionId == EditorInfo.IME_ACTION_DONE ||
+//                event != null &&
+//                event.action == KeyEvent.ACTION_DOWN &&
+//                event.keyCode == KeyEvent.KEYCODE_ENTER
+//            ) {
+//                sendAnswer()
+//                true
+//            } else {
+//                false
+//            }
+//        }
     }
 
     private fun sendAnswer() {
@@ -64,6 +67,25 @@ class MainActivity : AppCompatActivity() {
     private fun setBenderColor(color: Triple<Int, Int, Int>) {
         val (r, g, b) = color
         benderImage.setColorFilter(Color.rgb(r, g, b), PorterDuff.Mode.MULTIPLY)
+    }
+
+    override fun onEditorAction(v: TextView?, actionId: Int, event: KeyEvent?): Boolean {
+        if (actionId == EditorInfo.IME_ACTION_DONE) {
+            hideKeyboard()
+            onClick(sendBtn)
+            return true
+        }
+        return false
+    }
+
+    override fun onClick(v: View?) {
+        if (v?.id == R.id.iv_send) {
+            val (phrase, color) = benderObj.listenAnswer(messageEt.text.toString())
+            messageEt.setText("")
+            val (r, g, b) = color
+            benderImage.setColorFilter(Color.rgb(r, g, b), PorterDuff.Mode.MULTIPLY)
+            textTv.text = phrase
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle?) {

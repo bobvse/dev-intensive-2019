@@ -1,5 +1,7 @@
 package ru.skillbranch.devintensive.utils
 
+import android.content.res.Resources
+
 object Utils {
     private val transliterationMap = mapOf(
         'а' to "a", 'б' to "b", 'в' to "v", 'г' to "g", 'д' to "d",
@@ -42,5 +44,24 @@ object Utils {
             }
         }
         return result
+    }
+
+//    fun isRepositoryValid(repository: String): Boolean {
+//        val regex = Regex("^(?:https://)?(?:www.)?(?:github.com/)(?!${ignored.joinToString("|")})\\w+$")
+//        return repository.isEmpty() || regex.matches(repository)
+//    }
+
+    fun convertPxToDp(px: Int): Int {
+        val scale = Resources.getSystem().displayMetrics.density
+        return (px / scale + 0.5f).toInt()
+    }
+
+    fun convertDpToPx(dp: Int): Int {
+        val scale = Resources.getSystem().displayMetrics.density
+        return (dp * scale + 0.5f).toInt()
+    }
+
+    fun convertSpToPx(sp: Int): Int {
+        return sp * Resources.getSystem().displayMetrics.scaledDensity.toInt()
     }
 }

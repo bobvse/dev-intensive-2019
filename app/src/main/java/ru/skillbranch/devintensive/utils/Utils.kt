@@ -1,6 +1,6 @@
 package ru.skillbranch.devintensive.utils
 
-import android.content.res.Resources
+import android.content.Context
 
 object Utils {
     private val transliterationMap = mapOf(
@@ -13,9 +13,11 @@ object Utils {
         'э' to "e", 'ю' to "yu", 'я' to "ya"
     )
 
-    private val ignored = setOf("enterprise", "features", "topics",
+    private val ignored = setOf(
+        "enterprise", "features", "topics",
         "collections", "trending", "events", "marketplace", "pricing", "nonprofit",
-        "customer-stories", "security", "login", "join")
+        "customer-stories", "security", "login", "join"
+    )
 
     fun parseFullName(userName: String?): Pair<String?, String?> {
         val fullName: List<String>? =
@@ -55,17 +57,19 @@ object Utils {
         return repository.isEmpty() || regex.matches(repository)
     }
 
-    fun convertPxToDp(px: Int): Int {
-        val scale = Resources.getSystem().displayMetrics.density
-        return (px / scale + 0.5f).toInt()
-    }
-
-    fun convertDpToPx(dp: Int): Int {
-        val scale = Resources.getSystem().displayMetrics.density
+    fun convertDpToPx(context: Context, dp: Int): Int {
+        val scale = context.resources.displayMetrics.density
         return (dp * scale + 0.5f).toInt()
     }
 
-    fun convertSpToPx(sp: Int): Int {
-        return sp * Resources.getSystem().displayMetrics.scaledDensity.toInt()
+
+    fun convertPxToDp(context: Context, px: Int): Int {
+        val scale = context.resources.displayMetrics.density
+        return (px / scale + 0.5f).toInt()
+    }
+
+
+    fun convertSpToPx(context: Context, sp: Int): Int {
+        return sp * context.resources.displayMetrics.scaledDensity.toInt()
     }
 }

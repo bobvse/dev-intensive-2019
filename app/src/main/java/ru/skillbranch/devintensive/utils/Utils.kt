@@ -13,6 +13,10 @@ object Utils {
         'э' to "e", 'ю' to "yu", 'я' to "ya"
     )
 
+    private val ignored = setOf("enterprise", "features", "topics",
+        "collections", "trending", "events", "marketplace", "pricing", "nonprofit",
+        "customer-stories", "security", "login", "join")
+
     fun parseFullName(userName: String?): Pair<String?, String?> {
         val fullName: List<String>? =
             userName?.split(" ")?.filter { s: String -> s.isNotEmpty() }
@@ -46,10 +50,10 @@ object Utils {
         return result
     }
 
-//    fun isRepositoryValid(repository: String): Boolean {
-//        val regex = Regex("^(?:https://)?(?:www.)?(?:github.com/)(?!${ignored.joinToString("|")})\\w+$")
-//        return repository.isEmpty() || regex.matches(repository)
-//    }
+    fun isRepositoryValid(repository: String): Boolean {
+        val regex = Regex("^(?:https://)?(?:www.)?(?:github.com/)(?!${ignored.joinToString("|")})\\w+$")
+        return repository.isEmpty() || regex.matches(repository)
+    }
 
     fun convertPxToDp(px: Int): Int {
         val scale = Resources.getSystem().displayMetrics.density

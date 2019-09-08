@@ -1,31 +1,25 @@
 package ru.skillbranch.devintensive.extensions
 
 import android.app.Activity
-import android.content.Context.INPUT_METHOD_SERVICE
 import android.graphics.Rect
 import android.view.inputmethod.InputMethodManager
 
-fun Activity.isKeyboardOpen(): Boolean {
-    val r = Rect()
-    val rootView = window.decorView
-    rootView.getWindowVisibleDisplayFrame(r)
-    val screenHeight = rootView.height
-    var heightDiff = screenHeight - (r.bottom - r.top)
-    val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-    if (resourceId > 0) {
-        heightDiff -= resources.getDimensionPixelSize(resourceId)
+fun Activity.hideKeyboard() {
+    val view = currentFocus
+    if (view != null) {
+        val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
     }
-    if (heightDiff > 100) {
-        return true
-    }
-    return false
 }
 
-fun Activity.isKeyboardClosed() = !isKeyboardOpen()
+fun Activity.isKeyboardOpen(): Boolean {
+    val rect = Rect()
+    window.decorView.getWindowVisibleDisplayFrame(rect)
+    val screenHeight = window.decorView.rootView.height
+    val difference = screenHeight - (rect.bottom - rect.top)
+    return difference > 200
+}
 
-fun Activity.hideKeyboard() {
-    if (isKeyboardClosed()) return
-    val view = currentFocus ?: return
-    val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-    inputMethodManager.hideSoftInputFromWindow(view.windowToken, 0)
+fun Activity.isKeyboardClosed(): Boolean {
+    return !isKeyboardOpen()
 }

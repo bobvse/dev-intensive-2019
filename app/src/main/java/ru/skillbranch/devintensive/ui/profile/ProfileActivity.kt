@@ -1,23 +1,19 @@
 package ru.skillbranch.devintensive.ui.profile
 
-import android.graphics.ColorFilter
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
+import android.graphics.*
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
-import android.util.TypedValue
 import android.view.View
 import android.widget.EditText
 import android.widget.TextView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import kotlinx.android.synthetic.main.activity_profile.*
+
 import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.models.Profile
-import ru.skillbranch.devintensive.utils.Utils
 import ru.skillbranch.devintensive.viewmodels.ProfileViewModel
 
 class ProfileActivity : AppCompatActivity() {
@@ -27,8 +23,8 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private lateinit var viewModel: ProfileViewModel
-    var isEditMode = false
-    lateinit var viewFields: Map<String, TextView>
+    private var isEditMode = false
+    private lateinit var viewFields: Map<String, TextView>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setTheme(R.style.AppTheme)
@@ -47,25 +43,35 @@ class ProfileActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this).get(ProfileViewModel::class.java)
         viewModel.getProfileData().observe(this, Observer { updateUI(it) })
         viewModel.getTheme().observe(this, Observer { updateTheme(it) })
-        viewModel.getRepositoryError().observe(this, Observer { updateRepoError(it) })
-        viewModel.getIsRepoError().observe(this, Observer { updateRepository(it) })
+        viewModel.isRepoValid().observe(this, Observer { checkValidationError(it) })
     }
 
     private fun updateTheme(mode: Int) {
-        Log.d("M_ProfileActivity", "updateTheme")
         delegate.setLocalNightMode(mode)
+    }
+
+    private fun checkValidationError(isValidate: Boolean) {
+        if (isValidate) {
+            wr_repository.error = null
+            nested_scroll.scrollY = et_repository.bottom
+        } else {
+            wr_repository.error = "Невалидный адрес репозитория"
+            nested_scroll.scrollY = wr_repository.bottom
+            et_repository.requestFocus()
+        }
     }
 
     private fun updateUI(profile: Profile) {
         profile.toMap().also {
-            for ((k, v) in viewFields) {
+            for((k,v) in viewFields) {
                 v.text = it[k].toString()
             }
+            setDefaultAvatar(it["initials"].toString())
         }
-        updateAvatar(profile)
     }
 
     private fun initViews(savedInstanceState: Bundle?) {
+
         viewFields = mapOf(
             "nickName" to tv_nick_name,
             "rank" to tv_rank,
@@ -80,8 +86,19 @@ class ProfileActivity : AppCompatActivity() {
         isEditMode = savedInstanceState?.getBoolean(IS_EDIT_MODE, false) ?: false
         showCurrentMode(isEditMode)
 
+
+        et_repository.addTextChangedListener(object : TextWatcher {
+            override fun onTextChanged(text: CharSequence, p1: Int, p2: Int, p3: Int) {
+                viewModel.repositoryValidation(text.toString())
+            }
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(text: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+        })
+
         btn_edit.setOnClickListener {
-            viewModel.onRepoEditCompleted(wr_repository.isErrorEnabled)
+            if (wr_repository.error == "Невалидный адрес репозитория"){
+                et_repository.setText("")
+            }
 
             if (isEditMode) saveProfileInfo()
             isEditMode = !isEditMode
@@ -91,42 +108,36 @@ class ProfileActivity : AppCompatActivity() {
         btn_switch_theme.setOnClickListener {
             viewModel.switchTheme()
         }
-
-        et_repository.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.onRepositoryChanged(s.toString())
-            }
-
-            override fun afterTextChanged(s: Editable?) {}
-        })
     }
 
     private fun showCurrentMode(isEdit: Boolean) {
         val info = viewFields.filter { setOf("firstName", "lastName", "about", "repository").contains(it.key) }
-        for ((_, v) in info) {
-            v as EditText
-            v.isFocusable = isEdit
-            v.isFocusableInTouchMode = isEdit
-            v.isEnabled = isEdit
-            v.background.alpha = if (isEdit) 255 else 0
+        for((_, value) in info){
+            (value as EditText).apply {
+                isFocusable = isEdit
+                isFocusableInTouchMode = isEdit
+                isEnabled = isEdit
+                background.alpha = if(isEdit) 255 else 0
+            }
         }
-
-        ic_eye.visibility = if (isEdit) View.GONE else View.VISIBLE
+        ic_eye.visibility = if(isEdit) View.GONE else View.VISIBLE
         wr_about.isCounterEnabled = isEdit
+        wr_repository.isErrorEnabled = isEdit
 
         with(btn_edit) {
-            val filter: ColorFilter? = if (isEdit) {
-                PorterDuffColorFilter(getThemeAccentColor(), PorterDuff.Mode.SRC_IN)
+            val filter: ColorFilter? = if(isEdit) {
+                PorterDuffColorFilter(
+                    resources.getColor(R.color.color_accent, theme), PorterDuff.Mode.SRC_IN
+                )
             } else {
                 null
             }
-            val icon = if (isEdit) {
+
+            val icon = if(isEdit) {
                 resources.getDrawable(R.drawable.ic_save_black_24dp, theme)
             } else {
                 resources.getDrawable(R.drawable.ic_edit_black_24dp, theme)
             }
-
             background.colorFilter = filter
             setImageDrawable(icon)
         }
@@ -143,24 +154,7 @@ class ProfileActivity : AppCompatActivity() {
         }
     }
 
-    private fun getThemeAccentColor(): Int {
-        val value = TypedValue()
-        theme.resolveAttribute(R.attr.colorAccent, value, true)
-        return value.data
-    }
-
-    private fun updateAvatar(profile: Profile) {
-        val initials = Utils.toInitials(profile.firstName, profile.lastName)
-        iv_avatar.generateAvatar(initials, Utils.convertSpToPx(this, 48), theme)
-
-    }
-
-    private fun updateRepository(isError: Boolean) {
-        if (isError) et_repository.text.clear()
-    }
-
-    private fun updateRepoError(isError: Boolean) {
-        wr_repository.isErrorEnabled = isError
-        wr_repository.error = if (isError) "Невалидный адрес репозитория" else ""
+    private fun setDefaultAvatar(initials: String) {
+        //iv_avatar.setImageBitmap(iv_avatar.drawDefaultAvatar(initials))
     }
 }

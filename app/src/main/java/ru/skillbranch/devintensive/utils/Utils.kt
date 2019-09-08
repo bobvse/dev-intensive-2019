@@ -1,5 +1,10 @@
 package ru.skillbranch.devintensive.utils
 
+import android.content.Context
+import android.content.res.Configuration
+import android.util.TypedValue
+import ru.skillbranch.devintensive.R
+
 object Utils {
     fun parseFullName(fullName: String?): Pair<String?, String?> {
         val newFullName = fullName?.trim()
@@ -99,4 +104,11 @@ object Utils {
         }
         return (initials)
     }
+
+    fun getColor(context: Context, attrColor: Int): Int {
+        val value = TypedValue()
+        context.theme.resolveAttribute(attrColor, value, true)
+        return value.data
+    }
+
 }

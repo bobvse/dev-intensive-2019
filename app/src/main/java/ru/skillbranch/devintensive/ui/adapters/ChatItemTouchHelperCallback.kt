@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.models.data.ChatItem
+import ru.skillbranch.devintensive.utils.Utils
 
 
 class ChatItemTouchHelperCallback(
@@ -93,7 +94,8 @@ class ChatItemTouchHelperCallback(
         }
 
         with(bgPaint){
-            color = itemView.resources.getColor(R.color.color_primary_dark, itemView.context.theme)
+            color = Utils.getColor(itemView.context, R.attr.colorSwipe)
+            // color = itemView.resources.getColor(R.color.color_primary_dark, itemView.context.theme)
         }
 
         canvas.drawRect(bgRect,bgPaint)

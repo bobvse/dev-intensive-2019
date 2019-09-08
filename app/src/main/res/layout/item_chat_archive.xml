@@ -4,21 +4,24 @@
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/item_size"
                 android:padding="@dimen/spacing_normal_16"
-                android:background="@android:color/white">
+                android:background="?attr/colorItemView">
 
-    <ru.skillbranch.devintensive.ui.custom.AvatarImageView
+    <ImageView
             android:id="@+id/iv_avatar_archive"
             android:layout_width="@dimen/avatar_item_size"
             android:layout_height="@dimen/avatar_item_size"
-            android:layout_alignParentLeft="true"
+            android:background="@drawable/bg_archive_avatar"
             android:src="@drawable/ic_archive_black_24dp"
-            android:background="@color/color_gray"/>
+            android:padding="@dimen/spacing_small_8"
+            android:layout_marginEnd="@dimen/spacing_normal_16"
+            android:layout_alignParentStart="true" />
+
 
     <TextView
             android:id="@+id/tv_title_archive"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/color_primary"
+            android:textColor="?attr/colorTitle"
             android:fontFamily="sans-serif-medium"
             android:textSize="14sp"
             android:layout_toRightOf="@id/iv_avatar_archive"
@@ -31,7 +34,7 @@
             android:layout_height="wrap_content"
             tools:text="\@Name"
             android:textStyle="bold"
-            android:textColor="@color/color_gray_dark"
+            android:textColor="?attr/colorTitle"
             android:textSize="14sp"
             android:layout_toRightOf="@id/iv_avatar_archive"
             android:layout_marginLeft="@dimen/spacing_normal_16"
@@ -43,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:text="Когда я проходил интенсив, я мало спал"
-            android:textColor="@color/color_gray_dark"
+            android:textColor="?attr/colorText"
             android:textSize="14sp"
             android:layout_toRightOf="@id/tv_message_author_archive"
             android:layout_toLeftOf="@id/tv_counter_archive"
@@ -58,7 +61,7 @@
             android:textSize="10sp"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:textColor="@color/color_gray_dark"
+            android:textColor="?attr/colorText"
             tools:text="18:00"/>
     <TextView
             android:id="@+id/tv_counter_archive"

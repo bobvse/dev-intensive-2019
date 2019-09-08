@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
+import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -20,12 +21,15 @@ import ru.skillbranch.devintensive.ui.adapters.ChatAdapter
 import ru.skillbranch.devintensive.ui.adapters.ChatItemTouchHelperCallback
 import ru.skillbranch.devintensive.ui.archive.ArchiveActivity
 import ru.skillbranch.devintensive.ui.group.GroupActivity
+import ru.skillbranch.devintensive.utils.Utils
 import ru.skillbranch.devintensive.viewmodels.MainViewModel
+
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var chatAdapter: ChatAdapter
     private lateinit var viewModel: MainViewModel
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,21 +65,29 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
 
         chatAdapter = ChatAdapter{
-             if (it.chatType == ChatType.ARCHIVE){
+            if (it.chatType == ChatType.ARCHIVE){
                  val intent = Intent(this, ArchiveActivity::class.java)
                  startActivity(intent)
              }else{
-
-                 Snackbar.make(rv_chat_list, "Click on ${it.title}", Snackbar.LENGTH_SHORT).show()
+                val snackbar = Snackbar.make(rv_chat_list, "Click on ${it.title}", Snackbar.LENGTH_SHORT)
+                    val snackbarView = snackbar.view
+                val textView: TextView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text)
+                textView.setTextColor(Utils.getColor(this,R.attr.colorSnackBarText))
+                snackbarView.setBackgroundColor(Utils.getColor(this,R.attr.colorSnackBar))
+                snackbar.show()
              }
         }
         val divider = DividerItemDecoration(this,DividerItemDecoration.VERTICAL)
         val touchCallback = ChatItemTouchHelperCallback(chatAdapter){
             val id = it.id
             viewModel.addToArchive(it.id)
-            Snackbar.make(rv_chat_list, "Вы точно хотите добавить ${it.title} в архив?", Snackbar.LENGTH_LONG)
+            val snackbar = Snackbar.make(rv_chat_list, "Вы точно хотите добавить ${it.title} в архив?", Snackbar.LENGTH_LONG)
                 .setAction("ОТМЕНА") {viewModel.restoreFromArchive(id)}
-                .show()
+            val snackbarView = snackbar.view
+            val textView: TextView = snackbarView.findViewById(com.google.android.material.R.id.snackbar_text)
+            textView.setTextColor(Utils.getColor(this,R.attr.colorSnackBarText))
+            snackbarView.setBackgroundColor(Utils.getColor(this,R.attr.colorSnackBar))
+            snackbar.show()
         }
         val touchHelper = ItemTouchHelper(touchCallback)
         touchHelper.attachToRecyclerView(rv_chat_list)
@@ -96,8 +108,4 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         viewModel.getChatData().observe(this, Observer {chatAdapter.updateData(it) })
     }
-
-
-
-
 }

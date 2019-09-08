@@ -1,22 +1,12 @@
 <resources>
     <string name="app_name">Chat Dev-intensive</string>
-    <string name="profile_label_rating">Рейтинг</string>
+    <string name="Done">Done</string>
+    <string name="profile_file_rating">Рейтинг</string>
     <string name="profile_label_respect">Уважение</string>
     <string name="profile_hint_repository">Репозиторий</string>
     <string name="profile_hint_about">О себе</string>
     <string name="profile_hint_last_name">Фамилия</string>
     <string name="profile_hint_first_name">Имя</string>
-
-    <string name="content_description_profile_bg">Profile background</string>
-    <string name="content_description_profile_switch_theme">Switch on day or night theme</string>
-    <string name="content_description_profile_edit">Edit profile button</string>
-    <string name="profile_default_rank">Junior Android Developer</string>
-    <string name="profile_default_count">0</string>
-    <string name="content_description_profile_ic_avatar">Your name data</string>
-    <string name="content_description_profile_about">About you</string>
-    <string name="content_description_profile_repository">Your repository</string>
-    <string name="content_description_profile_eye">Look on repository</string>
     <string name="menu_search_title">Поиск</string>
-    <string name="archive_item_title">Архив чатов</string>
-
+    <string name="archive_chats">Архив чатов</string>
 </resources>

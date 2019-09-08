@@ -1,10 +1,11 @@
 package ru.skillbranch.devintensive.models
 
-class Bender(
-    var status : Status = Status.NORMAL,
-    var question: Question = Question.NAME) {
+import android.os.AsyncTask
+import androidx.core.text.isDigitsOnly
 
-    fun askQuestion(): String = when (question) {
+class Bender(var status: Status = Status.NORMAL, var question:Question = Question.NAME){
+
+    fun askQuestion():String = when(question){
         Question.NAME -> Question.NAME.question
         Question.PROFESSION -> Question.PROFESSION.question
         Question.MATERIAL -> Question.MATERIAL.question
@@ -13,77 +14,69 @@ class Bender(
         Question.IDLE -> Question.IDLE.question
     }
 
-    fun listenAnswer(answer: String): Pair<String, Triple<Int, Int, Int>> =
-        "${checkAnswer(answer)}${question.question}" to status.color
-
-    private fun checkAnswer(answer: String): String {
-        val (isValidate, message) = question.validate(answer)
-        return if (isValidate) {
-            if (question.answers.contains(answer.toLowerCase())) {
-                question = question.nextQuestion()
-                "Отлично - ты справился\n"
-            }
-            else {
-                status = status.nextStatus()
-                if (status != Status.NORMAL)
-                    "Это неправильный ответ\n"
-                else {
-                    question = Question.NAME
-                    "Это неправильный ответ. Давай все по новой\n"
+    fun listenAnswer(answer:String) : Pair<String,Triple<Int,Int,Int>> {
+        if (question.validate(answer)) {
+            return if (question.answers.contains(answer.toLowerCase())) {
+                    question = question.nextQuestion()
+                    "Отлично - ты справился\n${question.question}" to status.color
+            } else {
+                if (status.equals(Status.CRITICAL)) {
+                        question = Question.NAME
+                        status = Status.NORMAL
+                        "Это неправильный ответ. Давай все по новой\n${question.question}" to status.color
+                }else{status = status.nextStatus()
+                "Это неправильный ответ\n${question.question}" to status.color
                 }
             }
+        } else { return "${question.validation}\n${question.question}" to status.color
         }
-        else
-            message
     }
 
-    enum class Status(val color: Triple<Int, Int, Int>) {
-        NORMAL(Triple(255, 255, 255)),
-        WARNING(Triple(255, 120, 0)),
-        DANGER(Triple(255, 60, 60)),
-        CRITICAL(Triple(255, 0, 0));
 
-        fun nextStatus(): Status {
-            return if (this.ordinal < values().lastIndex)
+    enum class Status (val color: Triple<Int,Int,Int>){
+        NORMAL(Triple(255,255,255)),
+        WARNING(Triple(255,120,0)),
+        DANGER(Triple(255,60,60)),
+        CRITICAL(Triple(255,0,0));
+
+        fun nextStatus():Status{
+            return if (this.ordinal< values().lastIndex) {
                 values()[this.ordinal + 1]
-            else {
+            }else{
                 values()[0]
             }
         }
     }
-
-    enum class Question(val question: String, val answers: List<String>) {
-        NAME("Как меня зовут?", listOf("бендер", "bender")) {
+    enum class Question (val question:String, val answers:List<String>,val validation:String){
+        NAME("Как меня зовут?",listOf("бендер","bender"),"Имя должно начинаться с заглавной буквы") {
             override fun nextQuestion(): Question = PROFESSION
-            override fun validate(answer: String): Pair<Boolean, String> =
-                (answer.trim().firstOrNull()?.isUpperCase() ?: false) to "Имя должно начинаться с заглавной буквы\n"
+            override fun validate(answer: String):Boolean = answer.trim().firstOrNull()?.isUpperCase()?:false
         },
-        PROFESSION("Назови мою профессию?", listOf("сгибальщик", "bender")) {
+        PROFESSION("Назови мою профессию?",listOf("сгибальщик","bender"),"Профессия должна начинаться со строчной буквы") {
             override fun nextQuestion(): Question = MATERIAL
-            override fun validate(answer: String): Pair<Boolean, String> =
-                (answer.trim().firstOrNull()?.isLowerCase() ?: false) to "Профессия должна начинаться со строчной буквы\n"
+            override fun validate(answer: String):Boolean = answer.trim().firstOrNull()?.isLowerCase()?:false
         },
-        MATERIAL("Из чего я сделан?", listOf("металл", "дерево", "metal", "iron", "wood")) {
+        MATERIAL("Из чего я сделан?",listOf("металл","дерево","metal","iron","wood"),"Материал не должен содержать цифр") {
             override fun nextQuestion(): Question = BDAY
-            override fun validate(answer: String): Pair<Boolean, String> =
-                answer.trim().contains("\\d".toRegex()).not() to "Материал не должен содержать цифр\n"
+            override fun validate(answer: String):Boolean = Regex("""\d+""").containsMatchIn(answer).not()
         },
-        BDAY("Когда меня создали?", listOf("2993")) {
+        BDAY("Когда меня создали?",listOf("2993"),"Год моего рождения должен содержать только цифры") {
             override fun nextQuestion(): Question = SERIAL
-            override fun validate(answer: String): Pair<Boolean, String> =
-                answer.trim().contains("[^\\d]".toRegex()).not() to "Год моего рождения должен содержать только цифры\n"
+            override fun validate(answer: String):Boolean = answer.trim().isDigitsOnly()
+
         },
-        SERIAL("Мой серийный номер?", listOf("2716057")) {
+        SERIAL("Мой серийный номер?",listOf("2716057"),"Серийный номер содержит только цифры, и их 7") {
             override fun nextQuestion(): Question = IDLE
-            override fun validate(answer: String): Pair<Boolean, String> =
-                Regex("\\d{7}$").matches(answer.trim()) to "Серийный номер содержит только цифры, и их 7\n"
+            override fun validate(answer: String):Boolean = answer.trim().isDigitsOnly()&&answer.length==7
         },
-        IDLE("На этом все, вопросов больше нет", listOf()) {
+        IDLE("На этом все, вопросов больше нет",listOf(),"") {
             override fun nextQuestion(): Question = IDLE
-            override fun validate(answer: String): Pair<Boolean, String> = false to ""
+            override fun validate(answer: String):Boolean = false
         };
 
-        abstract fun nextQuestion(): Question
-        abstract fun validate(answer: String): Pair<Boolean, String>
+        abstract fun nextQuestion():Question
+        abstract fun validate(answer: String):Boolean
+
+
     }
 }

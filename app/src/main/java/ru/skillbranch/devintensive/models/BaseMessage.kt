@@ -5,25 +5,22 @@ import ru.skillbranch.devintensive.models.data.User
 import java.util.*
 
 abstract class BaseMessage (
-    val id : String,
-    val from : User?,
-    val chat : Chat,
-    val isIncoming : Boolean = false,
-    val date : Date = Date(),
+    val id:String,
+    val from: User?,
+    val chat: Chat,
+    val isIncoming: Boolean = false,
+    val date:Date = Date(),
     var isReaded: Boolean = false
+
 ){
-
-    abstract fun formatMessage() : String
-
-    companion object AbstractFactory {
+    abstract fun formatMessage():String
+    companion object abstractFactory{
         var lastId = -1
-        fun makeMessage(from: User?, chat: Chat, date: Date = Date(),
-                        type: String = "text", payload: Any?, isIncoming: Boolean = false, isReaded: Boolean = false) : BaseMessage{
+        fun makeMessage(from: User, chat: Chat, date: Date =Date(), type:String, payload:Any?, isIncoming: Boolean =false): BaseMessage{
             lastId++
-            return when(type) {
-                "image" -> ImageMessage("$lastId", from, chat, isIncoming, date, isReaded, payload as String?)
-                "text" -> TextMessage("$lastId", from, chat, isIncoming, date, isReaded, payload as String?)
-                else -> throw IllegalStateException("Unchecked message type")
+            return when(type){
+                "image" -> ImageMessage("$lastId",from,chat,date=date,image = payload as String,isIncoming = isIncoming)
+                else -> TextMessage("$lastId",from,chat,date=date,text = payload as String,isIncoming = isIncoming)
             }
         }
     }

@@ -1,13 +1,18 @@
 package ru.skillbranch.devintensive.ui.adapters
 
 import android.view.LayoutInflater
+import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.extensions.LayoutContainer
-
+import kotlinx.android.synthetic.main.item_chat_archive.*
+import kotlinx.android.synthetic.main.item_chat_group.*
+import kotlinx.android.synthetic.main.item_chat_single.*
+import kotlinx.android.synthetic.main.item_chat_single.sv_indicator
 import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.models.data.ChatItem
 import ru.skillbranch.devintensive.models.data.ChatType
@@ -81,9 +86,7 @@ class ChatAdapter(private val listener: (ChatItem) -> Unit) :
     inner class ArchiveViewHolder(itemView: View) : ChatItemViewHolder(itemView) {
 
         override fun bind(item: ChatItem, listener: (ChatItem) -> Unit) {
-
-
-            tv_date_archive.apply {
+            itemView.findViewById<TextView>(R.id.tv_date_archive).apply {
                 visibility = if (item.lastMessageDate != null) View.VISIBLE else View.GONE
                 text = item.lastMessageDate
             }

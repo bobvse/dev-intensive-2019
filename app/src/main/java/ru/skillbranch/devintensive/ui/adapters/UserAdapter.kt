@@ -3,13 +3,15 @@ package ru.skillbranch.devintensive.ui.adapters
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_user_list.*
 import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.models.data.UserItem
+import ru.skillbranch.devintensive.ui.custom.AvatarImageView
 
 class UserAdapter(
     private val listener: (UserItem) -> Unit
@@ -48,18 +50,19 @@ class UserAdapter(
             get() = itemView
 
         fun bind(user: UserItem, listener: (UserItem) -> Unit) {
+            val ivAvatarUser = itemView.findViewById<AvatarImageView>(R.id.iv_avatar_user)
             if (user.avatar != null) {
                 Glide.with(itemView)
                     .load(user.avatar)
-                    .into(iv_avatar_user)
+                    .into(ivAvatarUser)
             } else {
-                Glide.with(itemView).clear(iv_avatar_user)
-                iv_avatar_user.setInitials(user.initials ?: "??")
+                Glide.with(itemView).clear(ivAvatarUser)
+                ivAvatarUser.setInitials(user.initials ?: "??")
             }
-            sv_indicator.visibility = if (user.isOnline) View.VISIBLE else View.GONE
-            tv_user_name.text = user.fullName
-            tv_last_activity.text = user.lastActivity
-            iv_selected.visibility = if (user.isSelected) View.VISIBLE else View.GONE
+            itemView.findViewById<View>(R.id.sv_indicator).visibility = if (user.isOnline) View.VISIBLE else View.GONE
+            itemView.findViewById<TextView>(R.id.tv_user_name).text = user.fullName
+            itemView.findViewById<TextView>(R.id.tv_last_activity).text = user.lastActivity
+            itemView.findViewById<ImageView>(R.id.iv_selected).visibility = if (user.isSelected) View.VISIBLE else View.GONE
             itemView.setOnClickListener { listener.invoke(user) }
         }
     }

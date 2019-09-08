@@ -1,7 +1,6 @@
 package ru.skillbranch.devintensive.ui.adapters
 
 import android.view.LayoutInflater
-import android.view.TextureView
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
@@ -9,13 +8,10 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_chat_archive.*
-import kotlinx.android.synthetic.main.item_chat_group.*
-import kotlinx.android.synthetic.main.item_chat_single.*
-import kotlinx.android.synthetic.main.item_chat_single.sv_indicator
 import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.models.data.ChatItem
 import ru.skillbranch.devintensive.models.data.ChatType
+import ru.skillbranch.devintensive.ui.custom.AvatarImageView
 import ru.skillbranch.devintensive.utils.Utils
 
 class ChatAdapter(private val listener: (ChatItem) -> Unit) :
@@ -90,16 +86,16 @@ class ChatAdapter(private val listener: (ChatItem) -> Unit) :
                 visibility = if (item.lastMessageDate != null) View.VISIBLE else View.GONE
                 text = item.lastMessageDate
             }
-            tv_counter_archive.apply {
+            itemView.findViewById<TextView>(R.id.tv_counter_archive).apply {
                 visibility = if (item.messageCount > 0) View.VISIBLE else View.GONE
                 text = item.messageCount.toString()
             }
-            tv_title_archive.text = item.title
-            tv_message_archive.text = item.shortDescription
+            itemView.findViewById<TextView>(R.id.tv_title_archive).text = item.title
+            itemView.findViewById<TextView>(R.id.tv_message_archive).text = item.shortDescription
             itemView.setOnClickListener {
                 listener.invoke(item)
             }
-            tv_message_author_archive.apply {
+            itemView.findViewById<TextView>(R.id.tv_message_author_archive).apply {
                 visibility = if (item.lastMessageDate != null) View.VISIBLE else View.GONE
                 text = "@${item.author}"
             }
@@ -128,25 +124,27 @@ class ChatAdapter(private val listener: (ChatItem) -> Unit) :
         }
 
         override fun bind(item: ChatItem, listener: (ChatItem) -> Unit) {
+            val ivAvatarSingle = itemView.findViewById<AvatarImageView>(R.id.iv_avatar_single)
             if (item.avatar == null) {
-                Glide.with(itemView).clear(iv_avatar_single)
-                iv_avatar_single.setInitials(item.initials)
+                Glide.with(itemView).clear(ivAvatarSingle)
+                ivAvatarSingle.setInitials(item.initials)
             } else {
                 Glide.with(itemView)
                     .load(item.avatar)
-                    .into(iv_avatar_single)
+                    .into(ivAvatarSingle)
             }
-            sv_indicator.visibility = if (item.isOnline) View.VISIBLE else View.GONE
-            tv_date_single.apply {
+            itemView.findViewById<View>(R.id.sv_indicator).visibility =
+                if (item.isOnline) View.VISIBLE else View.GONE
+            itemView.findViewById<TextView>(R.id.tv_date_single).apply {
                 visibility = if (item.lastMessageDate != null) View.VISIBLE else View.GONE
                 text = item.lastMessageDate
             }
-            tv_counter_single.apply {
+            itemView.findViewById<TextView>(R.id.tv_counter_single).apply {
                 visibility = if (item.messageCount > 0) View.VISIBLE else View.GONE
                 text = item.messageCount.toString()
             }
-            tv_title_single.text = item.title
-            tv_message_single.text = item.shortDescription
+            itemView.findViewById<TextView>(R.id.tv_title_single).text = item.title
+            itemView.findViewById<TextView>(R.id.tv_message_single).text = item.shortDescription
             itemView.setOnClickListener {
                 listener.invoke(item)
             }
@@ -175,18 +173,18 @@ class ChatAdapter(private val listener: (ChatItem) -> Unit) :
         }
 
         override fun bind(item: ChatItem, listener: (ChatItem) -> Unit) {
-            iv_avatar_group.setInitials(item.initials)
-            tv_date_group.apply {
+            itemView.findViewById<AvatarImageView>(R.id.iv_avatar_group).setInitials(item.initials)
+            itemView.findViewById<TextView>(R.id.tv_date_group).apply {
                 visibility = if (item.lastMessageDate != null) View.VISIBLE else View.GONE
                 text = item.lastMessageDate
             }
-            tv_counter_group.apply {
+            itemView.findViewById<TextView>(R.id.tv_counter_group).apply {
                 visibility = if (item.messageCount > 0) View.VISIBLE else View.GONE
                 text = item.messageCount.toString()
             }
-            tv_title_group.text = item.title
-            tv_message_group.text = item.shortDescription
-            tv_message_author.apply {
+            itemView.findViewById<TextView>(R.id.tv_title_group).text = item.title
+                    itemView.findViewById<TextView>(R.id.tv_message_group).text = item.shortDescription
+                    itemView.findViewById<TextView>(R.id.tv_message_author).apply {
                 visibility = if (item.lastMessageDate != null) View.VISIBLE else View.GONE
                 text = "@${item.author}"
             }

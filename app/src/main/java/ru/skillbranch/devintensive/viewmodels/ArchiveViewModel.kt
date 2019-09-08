@@ -9,27 +9,23 @@ import ru.skillbranch.devintensive.models.data.ChatItem
 import ru.skillbranch.devintensive.repositories.ChatRepository
 
 class ArchiveViewModel : ViewModel() {
+
     private val query = mutableLiveData("")
     private val chatRepository = ChatRepository
     private val chats = Transformations.map(chatRepository.loadChats()) { chats ->
         return@map chats.filter { it.isArchived }
+            .sortedByDescending { it.lastMessageDate() }
             .map { it.toChatItem() }
-            .sortedBy { it.id.toInt() }
     }
 
-    fun getChatData(): LiveData<List<ChatItem>> {
+    fun getChatData() : LiveData<List<ChatItem>> {
         val result = MediatorLiveData<List<ChatItem>>()
 
         val filterF = {
             val queryStr = query.value!!
-            val chats2 = chats.value!!
+            val chats = this.chats.value!!
 
-            result.value = if (queryStr.isEmpty()) chats2 else chats2.filter {
-                it.title.contains(
-                    queryStr,
-                    true
-                )
-            }
+            result.value = if (queryStr.isEmpty()) chats else chats.filter { it.title.contains(queryStr, true) }
         }
 
         result.addSource(chats) { filterF.invoke() }

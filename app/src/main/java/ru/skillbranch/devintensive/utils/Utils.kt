@@ -1,43 +1,10 @@
 package ru.skillbranch.devintensive.utils
 
-import android.content.Context
-import android.content.res.Configuration
-import android.util.TypedValue
-import ru.skillbranch.devintensive.R
+import android.content.res.Resources
 
 object Utils {
 
-    fun parseFullName(fullName: String?): Pair<String?, String?> {
-        val parts: List<String>? = fullName?.split(" ")
-
-        val firstName = parts?.getOrNull(0)?.ifEmpty { null }
-        val lastName = parts?.getOrNull(1)?.ifEmpty { null }
-
-        return firstName to lastName
-    }
-
-    fun transliteration(payload: String, divider: String = " "): String {
-        var nickname = ""
-
-        payload.trim().forEach {
-            nickname += when {
-                it == ' ' -> divider
-                dictionary.containsKey(it.toLowerCase()) ->
-                    if (it.isUpperCase()) dictionary[it.toLowerCase()]?.capitalize() else dictionary[it]
-                else -> it
-            }
-        }
-        return nickname
-    }
-
-    fun toInitials(firstName: String?, lastName: String?): String? {
-        val firstLetter = firstName?.trim()?.firstOrNull()?.toUpperCase() ?: ""
-        val secondLetter = lastName?.trim()?.firstOrNull()?.toUpperCase() ?: ""
-
-        return "$firstLetter$secondLetter".ifEmpty { null }
-    }
-
-    private val dictionary = mapOf(
+    private val translitMap: Map<Char, String> = hashMapOf(
         'а' to "a",
         'б' to "b",
         'в' to "v",
@@ -73,22 +40,65 @@ object Utils {
         'я' to "ya"
     )
 
-    fun getThemeAccentColor(context: Context): Int {
-        val value = TypedValue()
-        context.theme.resolveAttribute(R.attr.colorAccent, value, true)
-        return value.data
+    private val ignored = setOf("enterprise", "features", "topics",
+        "collections", "trending", "events", "marketplace", "pricing", "nonprofit",
+        "customer-stories", "security", "login", "join")
+
+    fun parseFullName(fullName: String?) : Pair<String?, String?> {
+        val processedString = fullName?.trim()
+        if (processedString.isNullOrBlank())
+            return null to null
+        val parts : List<String>? = processedString.split("\\s+".toRegex())
+
+        val firstName = parts?.getOrNull(0)
+        val lastName = parts?.getOrNull(1)
+        return firstName to lastName
     }
 
-    fun getCurrntModeColor(context: Context, attrColor: Int): Int {
-        val value = TypedValue()
-        context.theme.resolveAttribute(attrColor, value, true)
-        return value.data
+    fun toFullName(firstName: String?, lastName: String?, divider: String = " ") : String {
+        return "${if (firstName.isNullOrBlank()) "" else "$firstName$divider"}${lastName ?: ""}"
     }
 
-    fun isNightModeActive(context: Context): Boolean {
-        return when (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_YES -> true
-            else -> false
+    fun transliteration(payload: String, divider: String = " "): String {
+        var processedString = payload.trim()
+        val charSet = processedString.toSet()
+        for (char in charSet) {
+            if (translitMap.containsKey(char.toLowerCase())) {
+                processedString = if (char.isUpperCase())
+                    processedString.replace("$char".toRegex(), translitMap.getValue(char.toLowerCase()).capitalize())
+                else
+                    processedString.replace("$char".toRegex(), translitMap.getValue(char))
+            }
         }
+        return processedString.replace(" ", divider)
+    }
+
+    fun toInitials(firstName: String?, lastName: String?) : String? {
+        if (firstName?.trim().isNullOrBlank() && lastName?.trim().isNullOrBlank())
+            return null
+        val firstInitial:String = if (!firstName.isNullOrBlank())
+            firstName.trim()[0].toUpperCase().toString() else ""
+        val secondInitial = if (!lastName.isNullOrBlank())
+            lastName.trim()[0].toUpperCase().toString() else ""
+        return "$firstInitial$secondInitial"
+    }
+
+    fun isRepositoryValid(repository: String): Boolean {
+        val regex = Regex("^(https://)?(www\\.)?(github\\.com/)(?!(${ignored.joinToString("|")})(?=/|\$))[a-zA-Z\\d](?:[a-zA-Z\\d]|-(?=[a-zA-Z\\d])){0,38}(/)?\$")
+        return repository.isEmpty() || regex.matches(repository)
+    }
+
+    fun convertPxToDp(px: Int): Int {
+        val scale = Resources.getSystem().displayMetrics.density
+        return (px / scale + 0.5f).toInt()
+    }
+
+    fun convertDpToPx(dp: Int): Int {
+        val scale = Resources.getSystem().displayMetrics.density
+        return (dp * scale + 0.5f).toInt()
+    }
+
+    fun convertSpToPx(sp: Int): Int {
+        return sp * Resources.getSystem().displayMetrics.scaledDensity.toInt()
     }
 }

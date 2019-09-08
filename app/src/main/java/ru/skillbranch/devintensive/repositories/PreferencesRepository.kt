@@ -2,7 +2,6 @@ package ru.skillbranch.devintensive.repositories
 
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
-//import androidx.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatDelegate
 import ru.skillbranch.devintensive.App
 import ru.skillbranch.devintensive.models.Profile
@@ -26,7 +25,7 @@ object PreferencesRepository {
         putValue(APP_THEME to theme)
     }
 
-    fun getAppTheme(): Int = prefs.getInt(APP_THEME, AppCompatDelegate.MODE_NIGHT_NO)
+    fun getAppTheme() = prefs.getInt(APP_THEME, AppCompatDelegate.MODE_NIGHT_NO)
 
     fun saveProfile(profile: Profile) {
         with(profile) {
@@ -39,28 +38,28 @@ object PreferencesRepository {
         }
     }
 
-    fun getProfile(): Profile =
-        Profile(
-            prefs.getString(FIRST_NAME, "")!!,
-            prefs.getString(LAST_NAME, "")!!,
-            prefs.getString(ABOUT, "")!!,
-            prefs.getString(REPOSITORY, "")!!,
-            prefs.getInt(RATING, 0),
-            prefs.getInt(RESPECT, 0)
-        )
+    fun getProfile() = Profile(
+        prefs.getString(FIRST_NAME, "")!!,
+        prefs.getString(LAST_NAME, "")!!,
+        prefs.getString(ABOUT, "")!!,
+        prefs.getString(REPOSITORY, "")!!,
+        prefs.getInt(RATING, 0),
+        prefs.getInt(RESPECT, 0)
+    )
 
-    private fun putValue(pair: Pair<String, Any>) = with(prefs.edit()) {
+    private fun putValue(pair: Pair<String, Any>) = with(prefs.edit()){
         val key = pair.first
         val value = pair.second
 
-        when (value) {
+        when(value) {
             is String -> putString(key, value)
             is Int -> putInt(key, value)
             is Boolean -> putBoolean(key, value)
             is Long -> putLong(key, value)
             is Float -> putFloat(key, value)
-            else -> error("Only primitives types can be stored in Shared Preferences")
+            else -> error("only primitives types can be stored in Shared Preferences")
         }
+
         apply()
     }
 }

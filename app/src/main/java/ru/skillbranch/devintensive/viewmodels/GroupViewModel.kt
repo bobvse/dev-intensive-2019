@@ -12,11 +12,9 @@ class GroupViewModel : ViewModel() {
     private val query = mutableLiveData("")
     private val groupRepository = GroupRepository
     private val userItems = mutableLiveData(loadUsers())
-    private val selectedItems = Transformations.map(userItems) { users ->
-        users.filter { it.isSelected }
-    }
+    private val selectedItems = Transformations.map(userItems){users -> users.filter { it.isSelected }}
 
-    fun getUsersData(): LiveData<List<UserItem>> {
+    fun getUserData() : LiveData<List<UserItem>> {
         val result = MediatorLiveData<List<UserItem>>()
 
         val filterF = {
@@ -24,33 +22,34 @@ class GroupViewModel : ViewModel() {
             val users = userItems.value!!
 
             result.value = if (queryStr.isEmpty()) users else users.filter {
-                it.fullName.contains(
-                    queryStr,
-                    true
-                )
+                it.fullName.contains(queryStr, true)
             }
         }
+        result.addSource(userItems) { filterF.invoke()}
+        result.addSource(query) { filterF.invoke()}
 
-        result.addSource(userItems) { filterF.invoke() }
-        result.addSource(query) { filterF.invoke() }
         return result
     }
 
-    fun getSelectedData(): LiveData<List<UserItem>> {
-        return selectedItems
-    }
+    fun getSelectedData() : LiveData<List<UserItem>> = selectedItems
 
     fun handleSelectedItem(userId: String) {
         userItems.value = userItems.value!!.map {
-            if (it.id == userId) it.copy(isSelected = !it.isSelected)
-            else it
+            if (it.id == userId)
+                it.copy(isSelected = !it.isSelected)
+            else
+                it
         }
     }
 
+    private fun loadUsers() : List<UserItem> = groupRepository.loadUsers().map{ it.toUserItem() }
+
     fun handleRemoveChip(userId: String) {
         userItems.value = userItems.value!!.map {
-            if (it.id == userId) it.copy(isSelected = false)
-            else it
+            if (it.id == userId)
+                it.copy(isSelected = false)
+            else
+                it
         }
     }
 
@@ -61,6 +60,4 @@ class GroupViewModel : ViewModel() {
     fun handleCreateGroup() {
         groupRepository.createChat(selectedItems.value!!)
     }
-
-    private fun loadUsers(): List<UserItem> = groupRepository.loadUsers().map { it.toUserItem() }
 }

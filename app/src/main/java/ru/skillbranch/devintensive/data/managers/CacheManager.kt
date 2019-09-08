@@ -7,18 +7,17 @@ import ru.skillbranch.devintensive.models.data.User
 import ru.skillbranch.devintensive.utils.DataGenerator
 
 object CacheManager {
+
     private val chats = mutableLiveData(DataGenerator.stabChats)
     private val users = mutableLiveData(DataGenerator.stabUsers)
 
-    fun loadChats(): MutableLiveData<List<Chat>> {
-        return chats
-    }
+    fun loadChats() : MutableLiveData<List<Chat>> = chats
 
-    fun findUsersByIds(ids: List<String>): List<User> {
+    fun findUsersByIds(ids: List<String>) : List<User> {
         return users.value!!.filter { ids.contains(it.id) }
     }
 
-    fun nextChatId(): String {
+    fun nextChatId() : String {
         return "${chats.value!!.size}"
     }
 

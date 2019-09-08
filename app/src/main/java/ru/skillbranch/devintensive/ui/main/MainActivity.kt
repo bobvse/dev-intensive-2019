@@ -1,10 +1,10 @@
 package ru.skillbranch.devintensive.ui.main
 
 import android.content.Intent
-import android.graphics.drawable.InsetDrawable
-import android.os.Bundle
-import android.view.Menu
 import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.util.TypedValue
+import android.view.Menu
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -14,15 +14,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_main.*
 import ru.skillbranch.devintensive.R
-import ru.skillbranch.devintensive.extensions.dp
-import ru.skillbranch.devintensive.extensions.setBackgroundDrawable
-import ru.skillbranch.devintensive.extensions.setTextColor
+import ru.skillbranch.devintensive.extensions.withColors
 import ru.skillbranch.devintensive.models.data.ChatType
 import ru.skillbranch.devintensive.ui.adapters.ChatAdapter
 import ru.skillbranch.devintensive.ui.adapters.ChatItemTouchHelperCallback
 import ru.skillbranch.devintensive.ui.archive.ArchiveActivity
 import ru.skillbranch.devintensive.ui.group.GroupActivity
-import ru.skillbranch.devintensive.utils.Utils
 import ru.skillbranch.devintensive.viewmodels.MainViewModel
 
 class MainActivity : AppCompatActivity() {
@@ -33,66 +30,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         initToolbar()
         initViews()
         initViewModel()
-    }
-
-    private fun initToolbar() {
-        setSupportActionBar(toolbar)
-    }
-
-    private fun initViews() {
-
-        chatAdapter = ChatAdapter {
-            if (it.chatType == ChatType.ARCHIVE) {
-                val intent = Intent(this, ArchiveActivity::class.java)
-                startActivity(intent)
-            } else {
-                Snackbar.make(rv_chat_list, "Click on ${it.title}", Snackbar.LENGTH_LONG)
-                    .setTextColor(Utils.getCurrntModeColor(this, R.attr.colorSnackBarText))
-                    .setBackgroundDrawable(R.drawable.bg_snackbar)
-                    .show()
-            }
-        }
-
-        val myDivider = resources.getDrawable(R.drawable.divider_chat_list, theme)
-        val myDividerWithMargin = InsetDrawable(myDivider, 72.dp, 0, 0, 0)
-        val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
-        divider.setDrawable(myDividerWithMargin)
-
-        val touchCallBack = ChatItemTouchHelperCallback(chatAdapter, false) {
-            val id = it.id
-            viewModel.addToArchive(id)
-
-            Snackbar.make(
-                rv_chat_list,
-                "Вы точно хотите добавить ${it.title} в архив?",
-                Snackbar.LENGTH_LONG
-            )
-                .setTextColor(Utils.getCurrntModeColor(this, R.attr.colorSnackBarText))
-                .setBackgroundDrawable(R.drawable.bg_snackbar)
-                .setAction("Нет") { viewModel.restoreFromArchive(id) }
-                .show()
-        }
-        val touchHelper = ItemTouchHelper(touchCallBack)
-        touchHelper.attachToRecyclerView(rv_chat_list)
-
-        rv_chat_list.apply {
-            adapter = chatAdapter
-            layoutManager = LinearLayoutManager(this@MainActivity)
-            addItemDecoration(divider)
-        }
-
-        fab.setOnClickListener {
-            val intent = Intent(this, GroupActivity::class.java)
-            startActivity(intent)
-        }
-    }
-
-    private fun initViewModel() {
-        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        viewModel.getChatData().observe(this, Observer { chatAdapter.updateData(it) })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -111,7 +52,58 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
-
         return super.onCreateOptionsMenu(menu)
+    }
+
+    private fun initToolbar() {
+        setSupportActionBar(toolbar)
+    }
+
+    private fun initViews() {
+
+        chatAdapter = ChatAdapter {
+            if (it.chatType != ChatType.ARCHIVE)
+                Snackbar.make(rv_chat_list, "Click on ${it.title}", Snackbar.LENGTH_LONG).show()
+            else {
+                val intent = Intent(this, ArchiveActivity::class.java)
+                startActivity(intent)
+            }
+        }
+
+        val divider = DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+        val touchCallback = ChatItemTouchHelperCallback(chatAdapter) {
+            if (it.chatType != ChatType.ARCHIVE) {
+                val id = it.id
+                viewModel.addToArchive(id)
+                val colorBg = TypedValue()
+                val colorFg = TypedValue()
+                theme.resolveAttribute(R.attr.colorSnackBarBackground, colorBg, true)
+                theme.resolveAttribute(R.attr.colorSnackBarText, colorFg, true)
+                Snackbar.make(
+                    rv_chat_list,
+                    "Вы точно хотите добавить ${it.title} в архив?",
+                    Snackbar.LENGTH_LONG
+                ).withColors(colorBg.data, colorFg.data).setAction("Отмена") { viewModel.restoreFromArchive(id) }.show()
+            }
+        }
+        val touchHelper = ItemTouchHelper(touchCallback)
+        touchHelper.attachToRecyclerView(rv_chat_list)
+
+        with(rv_chat_list) {
+            adapter = chatAdapter
+            layoutManager = LinearLayoutManager(this@MainActivity)
+            addItemDecoration(divider)
+        }
+
+
+        fab.setOnClickListener {
+            val intent = Intent(this, GroupActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    private fun initViewModel() {
+        viewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        viewModel.getChatData().observe(this, Observer { chatAdapter.updateData(it) })
     }
 }

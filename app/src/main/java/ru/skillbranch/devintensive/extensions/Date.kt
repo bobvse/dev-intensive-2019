@@ -2,76 +2,128 @@ package ru.skillbranch.devintensive.extensions
 
 import java.text.SimpleDateFormat
 import java.util.*
-import ru.skillbranch.devintensive.extensions.TimeUnits.*
+import kotlin.math.abs
 
-fun Date.format(pattern: String = "HH:mm:ss dd.MM.yy"): String {
+const val SECOND = 1000L
+const val MINUTE = 60 * SECOND
+const val HOUR = 60 * MINUTE
+const val DAY = 24 * HOUR
+
+fun Date.format(pattern: String = "HH:mm:ss dd.MM.yy") : String {
     val dateFormat = SimpleDateFormat(pattern, Locale("ru"))
     return dateFormat.format(this)
 }
 
-fun Date.add(value: Int, units: TimeUnits = SECOND): Date {
-    this.time = this.time + (units.value * value)
+fun Date.shortFormat() : String {
+    val pattern = if (isSameDay(Date())) "HH:mm" else "dd.MM.yy"
+    val dateFormat = SimpleDateFormat(pattern, Locale("ru"))
+    return dateFormat.format(this)
+}
+
+fun Date.isSameDay(date: Date) : Boolean {
+    val day1 = this.time / DAY
+    val day2 = date.time / DAY
+    return day1 == day2
+}
+
+fun Date.add(value: Int, units: TimeUnits = TimeUnits.SECOND) : Date {
+    var time = this.time
+
+    time += when(units) {
+        TimeUnits.SECOND -> value * SECOND
+        TimeUnits.MINUTE -> value * MINUTE
+        TimeUnits.HOUR -> value * HOUR
+        TimeUnits.DAY -> value * DAY
+    }
+    this.time = time
     return this
 }
 
 fun Date.humanizeDiff(date: Date = Date()): String {
-    var prefix = ""
-    var postfix = ""
-
-    var difference = date.time - this.time
-
-    if (difference < 0) {
-        prefix = "через "
-        difference = -difference
-    } else {
-        postfix = " назад"
+    val timeDiff = abs(this.time - date.time)
+    val isFuture = this.time > date.time
+    val text =  when {
+        (timeDiff >= 0L) and (timeDiff <= SECOND) -> "только что"
+        (timeDiff > SECOND) and (timeDiff <= 45 * SECOND) -> "несколько секунд"
+        (timeDiff > 45 * SECOND) and (timeDiff <= 75 * SECOND) -> "минуту"
+        (timeDiff > 75 * SECOND) and (timeDiff <= 45 * MINUTE) -> TimeUnits.MINUTE.plural(timeDiff / MINUTE)
+        (timeDiff > 45 * MINUTE) and (timeDiff <= 75 * MINUTE) -> "час"
+        (timeDiff > 75 * MINUTE) and (timeDiff <= 22 * HOUR) -> TimeUnits.HOUR.plural(timeDiff / HOUR)
+        (timeDiff > 22 * HOUR) and (timeDiff <= 26 * HOUR) -> "день"
+        (timeDiff > 26 * HOUR) and (timeDiff <= 360 * DAY) -> TimeUnits.DAY.plural(timeDiff / DAY)
+        else -> ""
     }
-
-    return when (difference) {
-        in 0..1 * SECOND.value -> "только что"
-        in 1 * SECOND.value..45 * SECOND.value -> "${prefix}несколько секунд$postfix"
-        in 45 * SECOND.value..75 * SECOND.value -> "${prefix}минуту$postfix"
-        in 75 * SECOND.value..45 * MINUTE.value -> "$prefix${MINUTE.plural(difference / MINUTE.value)}$postfix"
-        in 45 * MINUTE.value..75 * MINUTE.value -> "${prefix}час$postfix"
-        in 75 * MINUTE.value..22 * HOUR.value -> "$prefix${HOUR.plural(difference / HOUR.value)}$postfix"
-        in 22 * HOUR.value..26 * HOUR.value -> "${prefix}день$postfix"
-        in 26 * HOUR.value..360 * DAY.value -> "$prefix${DAY.plural(difference / DAY.value)}$postfix"
-        else -> if (date.time - this.time < 0) "более чем через год" else "более года назад"
+    return when(text) {
+        "только что" -> text
+        "" -> if (isFuture) "более чем через год" else "более года назад"
+        else -> if (isFuture) "через $text" else "$text назад"
     }
 }
 
-enum class TimeUnits(
-    val value: Long,
-    private val ONE: String,
-    private val FEW: String,
-    private val MANY: String
-) {
-
-    SECOND(1000L, "секунду", "секунды", "секунд"),
-    MINUTE(1000L * 60L, "минуту", "минуты", "минут"),
-    HOUR(1000L * 60L * 60L, "час", "часа", "часов"),
-    DAY(1000L * 60L * 60L * 24L, "день", "дня", "дней");
-
-    fun plural(num: Long): String {
-        return "$num ${this.getAmount(num)}"
-    }
-
-    private fun getAmount(num: Long): String {
-        return when {
-            num in 5..20L -> MANY
-            num % 10 == 1L -> ONE
-            num % 10 in 2..4L -> FEW
-            else -> MANY
+private fun humanizeText(amount: Long, type: TimeUnits) : String{
+    when (type) {
+        TimeUnits.MINUTE -> return when {
+            (amount % 10 == 1L) and (amount != 11L) -> "$amount минуту"
+            (amount % 10 in 2L..4L) and (amount !in 12L..14L) -> "$amount минуты"
+            else -> "$amount минут"
         }
+        TimeUnits.HOUR -> return when {
+            (amount % 10 == 1L) and (amount != 11L) -> "$amount час"
+            (amount % 10 in 2L..4L) and (amount !in 12L..14L) -> "$amount часа"
+            else -> "$amount часов"
+        }
+        else -> return if (amount <= 100)
+            when {
+                (amount % 10 == 1L) and (amount != 11L) -> "$amount день"
+                (amount % 10 in 2L..4L) and (amount !in 12L..14L) -> "$amount дня"
+                else -> "$amount дней"
+            }
+        else
+            when {
+                (amount % 10 == 1L) and (amount % 100 != 11L) -> "$amount день"
+                (amount % 10 in 2L..4L) and (amount % 100 !in 12L..14L) -> "$amount дня"
+                else -> "$amount дней"
+            }
     }
 }
 
-fun Date.shortFormat(): String? {
-    val pattern = if (this.issSameDay(Date())) "HH:mm" else "dd.MM.yy"
-    val dateFormat = SimpleDateFormat(pattern, Locale("ru"))
-    return dateFormat.format(this)
-}
+enum class TimeUnits {
+    SECOND {
+        override fun plural(amount: Long) : String {
+            return when {
+                    (amount % 10 == 1L) and (amount % 100 != 11L) -> "$amount секунду"
+                    (amount % 10 in 2L..4L) and (amount % 100 !in 12L..14L) -> "$amount секунды"
+                    else -> "$amount секунд"
+                }
+        }
+    },
+    MINUTE {
+        override fun plural(amount: Long) : String {
+            return when {
+                (amount % 10 == 1L) and (amount % 100 != 11L) -> "$amount минуту"
+                (amount % 10 in 2L..4L) and (amount % 100 !in 12L..14L) -> "$amount минуты"
+                else -> "$amount минут"
+            }
+        }
+    },
+    HOUR {
+        override fun plural(amount: Long) : String {
+            return when {
+                (amount % 10 == 1L) and (amount % 100 != 11L) -> "$amount час"
+                (amount % 10 in 2L..4L) and (amount % 100 !in 12L..14L) -> "$amount часа"
+                else -> "$amount часов"
+            }
+        }
+    },
+    DAY {
+        override fun plural(amount: Long) : String {
+            return when {
+                (amount % 10 == 1L) and (amount % 100 != 11L) -> "$amount день"
+                (amount % 10 in 2L..4L) and (amount % 100 !in 12L..14L) -> "$amount дня"
+                else -> "$amount дней"
+            }
+        }
+    };
 
-fun Date.issSameDay(date: Date): Boolean {
-    return this.time / DAY.value == date.time / DAY.value
+    abstract fun plural(amount: Long) : String
 }
